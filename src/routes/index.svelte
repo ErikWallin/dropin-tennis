@@ -9,9 +9,9 @@
 	<Grid>
 		<Row>
 			<Column>
-				<h1>Welcome to Dropin Doubles</h1>
+				<h1>Welcome to Dropin Tennis</h1>
 				<p>
-					Organizing friendly social doubles. It is time to start your first <Link
+					Organizing friendly social singles and doubles. It is time to start your first <Link
 						inline
 						href="/leagues/create">league</Link
 					>

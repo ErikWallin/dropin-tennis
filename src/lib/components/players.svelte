@@ -12,6 +12,8 @@
 	import { leagues } from '$lib/stores/leagues';
 	import { page } from '$app/stores';
 
+	const maxMatches = 4;
+
 	const headers = [
 		{ key: 'name', value: 'Name' },
 		{ key: 'queueTime', value: 'Queue time' },
@@ -22,20 +24,45 @@
 	let league;
 	let rows;
 	leagues.subscribe((value) => {
+		const now = Date.now();
 		league = value.find((v) => v.name === $page.params.name);
 		rows =
 			league.players &&
-			league.players.map((p) => {
-				return {
-					id: p.name,
-					name: p.name,
-					queueTime: '2h',
-					matches: league.matches
-						.map((m) => m.teams.flat())
-						.flat()
-						.filter((pn) => pn === p.name).length
-				};
-			});
+			league.players
+				.map((p) => {
+					const matches = league.matches.filter(
+						(m) => m.team1.includes(p.name) || m.team2.includes(p.name)
+					);
+					const finishedMatches = matches.filter((m) => m.endTime);
+					return {
+						id: p.name,
+						name: p.name,
+						queueTime:
+							matches.length > finishedMatches.length
+								? now
+								: (finishedMatches.length > 0
+								? Math.max(...finishedMatches.map((m) => m.endTime))
+								: p.startTime),
+						matches: matches.length
+					};
+				})
+				.sort((a, b) => {
+					if (a.matches >= maxMatches && b.matches < maxMatches) {
+						return b;
+					}
+					if (b.matches >= maxMatches && a.matches < maxMatches) {
+						return a;
+					}
+					const queueTimeDiff = a.queueTime - b.queueTime;
+					if (queueTimeDiff !== 0) {
+						return queueTimeDiff;
+					}
+					const matchesDiff = a.matches - b.matches;
+					if (matchesDiff !== 0) {
+						return matchesDiff;
+					}
+					return a.name.localeCompare(b.name);
+				});
 	});
 	let selectedRowIds = [];
 
@@ -45,7 +72,8 @@
 			leagues.update((ls) => {
 				const l = ls.find((v) => v.name === $page.params.name);
 				l.players.push({
-					name: newPlayerName
+					name: newPlayerName,
+					startTime: Date.now()
 				});
 				return ls;
 			});
@@ -54,6 +82,7 @@
 		addPlayerOpen = false;
 	}
 
+	$: isNewMatchEnabled = selectedRowIds.length === 2 || selectedRowIds.length === 4;
 	let newMatchOpen = false;
 	let doublesPartner = null;
 	function prepareNewMatch() {
@@ -66,8 +95,12 @@
 				const l = ls.find((v) => v.name === $page.params.name);
 				l.matches.push({
 					id: Math.floor(Math.random() * 10000) + 1,
-					teams: [[selectedRowIds[0]], [selectedRowIds[1]]],
-					result: null
+					team1: [selectedRowIds[0]],
+					team2: [selectedRowIds[1]],
+					result1: null,
+					result2: null,
+					startTime: Date.now(),
+					endTime: null
 				});
 				return ls;
 			});
@@ -77,11 +110,10 @@
 				const l = ls.find((v) => v.name === $page.params.name);
 				l.matches.push({
 					id: Math.floor(Math.random() * 10000) + 1,
-					teams: [
-						[selectedRowIds[0], doublesPartner],
-						selectedRowIds.filter((p) => p !== selectedRowIds[0] && p !== doublesPartner)
-					],
-					result: null
+					team1: [selectedRowIds[0], doublesPartner],
+					team2: selectedRowIds.filter((p) => p !== selectedRowIds[0] && p !== doublesPartner),
+					result1: null,
+					result2: null
 				});
 				return ls;
 			});
@@ -95,7 +127,7 @@
 	<Toolbar>
 		<ToolbarContent>
 			<Button kind="tertiary" on:click={() => (addPlayerOpen = true)}>Add Player</Button>
-			<Button kind="tertiary" on:click={prepareNewMatch}>New Match</Button>
+			<Button disabled={!isNewMatchEnabled} kind="tertiary" on:click={prepareNewMatch}>New Match</Button>
 		</ToolbarContent>
 	</Toolbar>
 </DataTable>

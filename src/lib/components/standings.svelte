@@ -33,34 +33,34 @@
 			};
 		});
 		league.matches.forEach((m) => {
-			m.teams[0].forEach((p) => {
+			m.team1.forEach((p) => {
 				rowsTemp[p].matchesPlayed = rowsTemp[p].matchesPlayed + 1;
-				if (m.result) {
-					if (m.result[0] > m.result[1]) {
+				if (m.result1) {
+					if (m.result1 > m.result2) {
 						rowsTemp[p].matchesWon = rowsTemp[p].matchesWon + 1;
-					} else if (m.result[0] < m.result[1]) {
+					} else if (m.result1 < m.result2) {
 						rowsTemp[p].matchesLost = rowsTemp[p].matchesLost + 1;
 					} else {
 						rowsTemp[p].matchesDraw = rowsTemp[p].matchesDraw + 1;
 					}
 					rowsTemp[p].points = rowsTemp[p].matchesWon * 2 + rowsTemp[p].matchesDraw;
-					rowsTemp[p].gamesWon = rowsTemp[p].gamesWon + m.result[0];
-					rowsTemp[p].gamesLost = rowsTemp[p].gamesLost + m.result[1];
+					rowsTemp[p].gamesWon = rowsTemp[p].gamesWon + m.result1;
+					rowsTemp[p].gamesLost = rowsTemp[p].gamesLost + m.result2;
 				}
 			});
-			m.teams[1].forEach((p) => {
+			m.team2.forEach((p) => {
 				rowsTemp[p].matchesPlayed = rowsTemp[p].matchesPlayed + 1;
-				if (m.result) {
-					if (m.result[1] > m.result[0]) {
+				if (m.result1) {
+					if (m.result2 > m.result1) {
 						rowsTemp[p].matchesWon = rowsTemp[p].matchesWon + 1;
-					} else if (m.result[1] < m.result[0]) {
+					} else if (m.result2 < m.result1) {
 						rowsTemp[p].matchesLost = rowsTemp[p].matchesLost + 1;
 					} else {
 						rowsTemp[p].matchesDraw = rowsTemp[p].matchesDraw + 1;
 					}
 					rowsTemp[p].points = rowsTemp[p].matchesWon * 2 + rowsTemp[p].matchesDraw;
-					rowsTemp[p].gamesWon = rowsTemp[p].gamesWon + m.result[1];
-					rowsTemp[p].gamesLost = rowsTemp[p].gamesLost + m.result[0];
+					rowsTemp[p].gamesWon = rowsTemp[p].gamesWon + m.result2;
+					rowsTemp[p].gamesLost = rowsTemp[p].gamesLost + m.result1;
 				}
 			});
 		});

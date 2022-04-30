@@ -38,7 +38,8 @@ You can preview the production build with `npm run preview`.
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
 
 ## Deploy
-Set up firebase
+
+Set up firebase for your project. Change the connection setting in fb.js 
 
 ```bash
 firebase deploy

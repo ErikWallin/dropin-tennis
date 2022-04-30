@@ -12,48 +12,57 @@
 				name: newLeagueName,
 				players: [
 					{
-						name: 'Bertil'
+						name: 'Bertil',
+						startTime: Date.now() - 10000
 					},
 					{
-						name: 'Tärje'
+						name: 'Tärje',
+						startTime: Date.now() - 20000
 					},
 					{
-						name: 'AD'
+						name: 'AD',
+						startTime: Date.now() - 30000
 					},
 					{
-						name: 'Coco'
+						name: 'Coco',
+						startTime: Date.now() - 40000
 					},
 					{
-						name: 'Claes'
+						name: 'Claes',
+						startTime: Date.now() - 50000
 					},
 					{
-						name: 'Anders'
+						name: 'Anders',
+						startTime: Date.now() - 60000
 					}
 				],
 				matches: [
 					{
 						id: 1,
-						teams: [
-							['Bertil', 'Tärje'],
-							['AD', 'Coco']
-						],
-						result: [6, 2]
+						team1: ['Bertil', 'Tärje'],
+						team2: ['AD', 'Coco'],
+						result1: 6,
+						result2: 2,
+						startTime: Date.now() - 1000,
+						endTime: Date.now() - 1
 					},
 					{
 						id: 2,
-						teams: [
-							['Bertil', 'AD'],
-							['Tärje', 'Anders']
-						],
-						result: [4, 4]
+						team1: ['Bertil', 'AD'],
+						team2: ['Tärje', 'Anders'],
+						result1: 4,
+						result2: 4,
+						startTime: Date.now() - 2000,
+						endTime: Date.now() - 2
 					},
 					{
 						id: 3,
-						teams: [
-							['Bertil', 'Coco'],
-							['Tärje', 'Claes']
-						],
-						result: [3, 5]
+						team1: ['Bertil', 'Coco'],
+						team2: ['Tärje', 'Claes'],
+						result1: 3,
+						result2: 5,
+						startTime: Date.now() - 3000,
+						endTime: Date.now() - 3
 					}
 				]
 			});
