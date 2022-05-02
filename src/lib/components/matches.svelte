@@ -1,5 +1,5 @@
 <script>
-	import { leagues } from '$lib/stores/leagues';
+	import { league } from '$lib/stores/leagues';
 	import { page } from '$app/stores';
 	import {
 		Button,
@@ -12,17 +12,17 @@
 		Row,
 		Column
 	} from 'carbon-components-svelte';
+	import { doc, setDoc } from 'firebase/firestore';
+	import { db } from '$lib/fb';
 
 	const headers = [
 		{ key: 'opponents', value: 'Opponents' },
 		{ key: 'result', value: 'Result' }
 	];
 
-	let league;
-	let rows;
-	leagues.subscribe((value) => {
-		league = value.find((v) => v.name === $page.params.name);
-		rows = league.matches.map((m) => {
+	$: rows =
+		$league &&
+		$league.matches.map((m) => {
 			const opponents =
 				m.team1[0] +
 				(m.team1[1] ? '/' + m.team1[1] : '') +
@@ -35,30 +35,24 @@
 				result: m.result1 && m.result2 ? m.result1 + '-' + m.result2 : 'ongoing'
 			};
 		});
-	});
 
 	let selectedRowIds = [];
 	$: selectedMatch =
-		selectedRowIds[0] && league.matches.filter((m) => m.id === selectedRowIds[0])[0];
+		selectedRowIds[0] && $league.matches.filter((m) => m.id === selectedRowIds[0])[0];
 
 	$: isRemoveEnabled = selectedRowIds.length > 0;
 	let removeMatchOpen = false;
-	function removeMatch() {
-		leagues.update((ls) => {
-			const l = ls.find((v) => v.name === $page.params.name);
-			l.matches = l.matches.filter((m) => !selectedRowIds.includes(m.id));
-			return ls;
-		});
+	async function removeMatch() {
+		$league.matches = $league.matches.filter((m) => !selectedRowIds.includes(m.id));
+		await setDoc(doc(db, 'leagues', $page.params.id), $league);
 		selectedRowIds = [];
 		removeMatchOpen = false;
 	}
 
 	$: isEditEnabled = selectedRowIds.length === 1;
 	let editMatchOpen = false;
-	function editMatch() {
-		leagues.update((ls) => {
-			return ls;
-		});
+	async function editMatch() {
+		await setDoc(doc(db, 'leagues', $page.params.id), $league);
 		selectedRowIds = [];
 		editMatchOpen = false;
 	}

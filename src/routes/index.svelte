@@ -1,7 +1,4 @@
 <script>
-	import { leagues } from '$lib/stores/leagues';
-	import Createleague from './leagues/create.svelte';
-
 	import { Content, Grid, Row, Column, Link } from 'carbon-components-svelte';
 </script>
 

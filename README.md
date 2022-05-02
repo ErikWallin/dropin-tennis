@@ -39,7 +39,7 @@ You can preview the production build with `npm run preview`.
 
 ## Deploy
 
-Set up firebase for your project. Change the connection setting in fb.js 
+Set up firebase for your project. Change the connection setting in fb.js
 
 ```bash
 firebase deploy

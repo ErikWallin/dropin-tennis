@@ -1,6 +1,6 @@
 <script>
-	import { Button, DataTable, TextInput, Toolbar, ToolbarContent } from 'carbon-components-svelte';
-	import { leagues } from '$lib/stores/leagues';
+	import { DataTable, TextInput } from 'carbon-components-svelte';
+	import { league } from '$lib/stores/leagues';
 	import { page } from '$app/stores';
 
 	const headers = [
@@ -14,12 +14,10 @@
 		{ key: 'points', value: 'Points' }
 	];
 
-	let league;
 	let rows;
-	leagues.subscribe((value) => {
-		league = value.find((v) => v.name === $page.params.name);
+	$: if ($league) {
 		let rowsTemp = {};
-		league.players.forEach((p) => {
+		$league.players.forEach((p) => {
 			rowsTemp[p.name] = {
 				id: p.name,
 				name: p.name,
@@ -32,7 +30,7 @@
 				points: 0
 			};
 		});
-		league.matches.forEach((m) => {
+		$league.matches.forEach((m) => {
 			m.team1.forEach((p) => {
 				rowsTemp[p].matchesPlayed = rowsTemp[p].matchesPlayed + 1;
 				if (m.result1) {
@@ -82,7 +80,7 @@
 				return gamesWonDiff;
 			}
 		});
-	});
+	}
 </script>
 
 <DataTable title="Standings" size="compact" {headers} {rows} />

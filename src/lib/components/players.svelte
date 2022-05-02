@@ -9,7 +9,9 @@
 		RadioButtonGroup,
 		RadioButton
 	} from 'carbon-components-svelte';
-	import { leagues } from '$lib/stores/leagues';
+	import { league } from '$lib/stores/leagues';
+	import { doc, setDoc } from 'firebase/firestore';
+	import { db } from '$lib/fb';
 	import { page } from '$app/stores';
 
 	const maxMatches = 4;
@@ -21,62 +23,55 @@
 	];
 
 	let newPlayerName = null;
-	let league;
-	let rows;
-	leagues.subscribe((value) => {
-		const now = Date.now();
-		league = value.find((v) => v.name === $page.params.name);
-		rows =
-			league.players &&
-			league.players
-				.map((p) => {
-					const matches = league.matches.filter(
-						(m) => m.team1.includes(p.name) || m.team2.includes(p.name)
-					);
-					const finishedMatches = matches.filter((m) => m.endTime);
-					return {
-						id: p.name,
-						name: p.name,
-						queueTime:
-							matches.length > finishedMatches.length
-								? now
-								: (finishedMatches.length > 0
-								? Math.max(...finishedMatches.map((m) => m.endTime))
-								: p.startTime),
-						matches: matches.length
-					};
-				})
-				.sort((a, b) => {
-					if (a.matches >= maxMatches && b.matches < maxMatches) {
-						return b;
-					}
-					if (b.matches >= maxMatches && a.matches < maxMatches) {
-						return a;
-					}
-					const queueTimeDiff = a.queueTime - b.queueTime;
-					if (queueTimeDiff !== 0) {
-						return queueTimeDiff;
-					}
-					const matchesDiff = a.matches - b.matches;
-					if (matchesDiff !== 0) {
-						return matchesDiff;
-					}
-					return a.name.localeCompare(b.name);
-				});
-	});
+	$: rows =
+		$league &&
+		$league.players &&
+		$league.players
+			.map((p) => {
+				const matches = $league.matches.filter(
+					(m) => m.team1.includes(p.name) || m.team2.includes(p.name)
+				);
+				const finishedMatches = matches.filter((m) => m.endTime);
+				return {
+					id: p.name,
+					name: p.name,
+					queueTime:
+						matches.length > finishedMatches.length
+							? Date.now()
+							: finishedMatches.length > 0
+							? Math.max(...finishedMatches.map((m) => m.endTime))
+							: p.startTime,
+					matches: matches.length
+				};
+			})
+			.sort((a, b) => {
+				if (a.matches >= maxMatches && b.matches < maxMatches) {
+					return b;
+				}
+				if (b.matches >= maxMatches && a.matches < maxMatches) {
+					return a;
+				}
+				const queueTimeDiff = a.queueTime - b.queueTime;
+				if (queueTimeDiff !== 0) {
+					return queueTimeDiff;
+				}
+				const matchesDiff = a.matches - b.matches;
+				if (matchesDiff !== 0) {
+					return matchesDiff;
+				}
+				return a.name.localeCompare(b.name);
+			});
+
 	let selectedRowIds = [];
 
 	let addPlayerOpen = false;
-	function addPlayer() {
+	async function addPlayer() {
 		if (newPlayerName) {
-			leagues.update((ls) => {
-				const l = ls.find((v) => v.name === $page.params.name);
-				l.players.push({
-					name: newPlayerName,
-					startTime: Date.now()
-				});
-				return ls;
+			$league.players.push({
+				name: newPlayerName,
+				startTime: Date.now()
 			});
+			await setDoc(doc(db, 'leagues', $page.params.id), $league);
 			newPlayerName = null;
 		}
 		addPlayerOpen = false;
@@ -89,36 +84,29 @@
 		doublesPartner = selectedRowIds[1];
 		newMatchOpen = true;
 	}
-	function newMatch() {
+	async function newMatch() {
 		if (selectedRowIds.length === 2) {
-			leagues.update((ls) => {
-				const l = ls.find((v) => v.name === $page.params.name);
-				l.matches.push({
-					id: Math.floor(Math.random() * 10000) + 1,
-					team1: [selectedRowIds[0]],
-					team2: [selectedRowIds[1]],
-					result1: null,
-					result2: null,
-					startTime: Date.now(),
-					endTime: null
-				});
-				return ls;
+			$league.matches.push({
+				id: Math.floor(Math.random() * 10000) + 1,
+				team1: [selectedRowIds[0]],
+				team2: [selectedRowIds[1]],
+				result1: null,
+				result2: null,
+				startTime: Date.now(),
+				endTime: null
 			});
 			selectedRowIds = [];
 		} else if (selectedRowIds.length === 4) {
-			leagues.update((ls) => {
-				const l = ls.find((v) => v.name === $page.params.name);
-				l.matches.push({
-					id: Math.floor(Math.random() * 10000) + 1,
-					team1: [selectedRowIds[0], doublesPartner],
-					team2: selectedRowIds.filter((p) => p !== selectedRowIds[0] && p !== doublesPartner),
-					result1: null,
-					result2: null
-				});
-				return ls;
+			$league.matches.push({
+				id: Math.floor(Math.random() * 10000) + 1,
+				team1: [selectedRowIds[0], doublesPartner],
+				team2: selectedRowIds.filter((p) => p !== selectedRowIds[0] && p !== doublesPartner),
+				result1: null,
+				result2: null
 			});
-			selectedRowIds = [];
 		}
+		await setDoc(doc(db, 'leagues', $page.params.id), $league);
+		selectedRowIds = [];
 		newMatchOpen = false;
 	}
 </script>
@@ -127,7 +115,9 @@
 	<Toolbar>
 		<ToolbarContent>
 			<Button kind="tertiary" on:click={() => (addPlayerOpen = true)}>Add Player</Button>
-			<Button disabled={!isNewMatchEnabled} kind="tertiary" on:click={prepareNewMatch}>New Match</Button>
+			<Button disabled={!isNewMatchEnabled} kind="tertiary" on:click={prepareNewMatch}
+				>New Match</Button
+			>
 		</ToolbarContent>
 	</Toolbar>
 </DataTable>
