@@ -1,7 +1,6 @@
 <script>
-	import { DataTable, TextInput } from 'carbon-components-svelte';
+	import { DataTable } from 'carbon-components-svelte';
 	import { league } from '$lib/stores/leagues';
-	import { page } from '$app/stores';
 
 	const headers = [
 		{ key: 'name', value: 'Name' },
@@ -18,8 +17,8 @@
 	$: if ($league) {
 		let rowsTemp = {};
 		$league.players.forEach((p) => {
-			rowsTemp[p.name] = {
-				id: p.name,
+			rowsTemp[p.id] = {
+				id: p.id,
 				name: p.name,
 				matchesPlayed: 0,
 				matchesWon: 0,
@@ -31,34 +30,34 @@
 			};
 		});
 		$league.matches.forEach((m) => {
-			m.team1.forEach((p) => {
-				rowsTemp[p].matchesPlayed = rowsTemp[p].matchesPlayed + 1;
+			m.team1.forEach((pId) => {
+				rowsTemp[pId].matchesPlayed = rowsTemp[pId].matchesPlayed + 1;
 				if (m.result1) {
 					if (m.result1 > m.result2) {
-						rowsTemp[p].matchesWon = rowsTemp[p].matchesWon + 1;
+						rowsTemp[pId].matchesWon = rowsTemp[pId].matchesWon + 1;
 					} else if (m.result1 < m.result2) {
-						rowsTemp[p].matchesLost = rowsTemp[p].matchesLost + 1;
+						rowsTemp[pId].matchesLost = rowsTemp[pId].matchesLost + 1;
 					} else {
-						rowsTemp[p].matchesDraw = rowsTemp[p].matchesDraw + 1;
+						rowsTemp[pId].matchesDraw = rowsTemp[pId].matchesDraw + 1;
 					}
-					rowsTemp[p].points = rowsTemp[p].matchesWon * 2 + rowsTemp[p].matchesDraw;
-					rowsTemp[p].gamesWon = rowsTemp[p].gamesWon + m.result1;
-					rowsTemp[p].gamesLost = rowsTemp[p].gamesLost + m.result2;
+					rowsTemp[pId].points = rowsTemp[pId].matchesWon * 2 + rowsTemp[pId].matchesDraw;
+					rowsTemp[pId].gamesWon = rowsTemp[pId].gamesWon + m.result1;
+					rowsTemp[pId].gamesLost = rowsTemp[pId].gamesLost + m.result2;
 				}
 			});
-			m.team2.forEach((p) => {
-				rowsTemp[p].matchesPlayed = rowsTemp[p].matchesPlayed + 1;
+			m.team2.forEach((pId) => {
+				rowsTemp[pId].matchesPlayed = rowsTemp[pId].matchesPlayed + 1;
 				if (m.result1) {
 					if (m.result2 > m.result1) {
-						rowsTemp[p].matchesWon = rowsTemp[p].matchesWon + 1;
+						rowsTemp[pId].matchesWon = rowsTemp[pId].matchesWon + 1;
 					} else if (m.result2 < m.result1) {
-						rowsTemp[p].matchesLost = rowsTemp[p].matchesLost + 1;
+						rowsTemp[pId].matchesLost = rowsTemp[pId].matchesLost + 1;
 					} else {
-						rowsTemp[p].matchesDraw = rowsTemp[p].matchesDraw + 1;
+						rowsTemp[pId].matchesDraw = rowsTemp[pId].matchesDraw + 1;
 					}
-					rowsTemp[p].points = rowsTemp[p].matchesWon * 2 + rowsTemp[p].matchesDraw;
-					rowsTemp[p].gamesWon = rowsTemp[p].gamesWon + m.result2;
-					rowsTemp[p].gamesLost = rowsTemp[p].gamesLost + m.result1;
+					rowsTemp[pId].points = rowsTemp[pId].matchesWon * 2 + rowsTemp[pId].matchesDraw;
+					rowsTemp[pId].gamesWon = rowsTemp[pId].gamesWon + m.result2;
+					rowsTemp[pId].gamesLost = rowsTemp[pId].gamesLost + m.result1;
 				}
 			});
 		});

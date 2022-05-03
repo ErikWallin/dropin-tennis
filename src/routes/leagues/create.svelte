@@ -3,12 +3,14 @@
 	import { goto } from '$app/navigation';
 	import { collection, addDoc } from 'firebase/firestore';
 	import { db } from '$lib/fb';
+	import { user } from '$lib/stores/user';
 
 	let name = null;
 
 	async function createLeague() {
 		const newLeagueName = name;
 		const docRef = await addDoc(collection(db, 'leagues'), {
+			owners: [$user.uid],
 			name: newLeagueName,
 			players: [],
 			matches: []

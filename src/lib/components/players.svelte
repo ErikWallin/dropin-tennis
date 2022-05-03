@@ -22,7 +22,6 @@
 		{ key: 'matches', value: 'Matches' }
 	];
 
-	let newPlayerName = null;
 	$: rows =
 		$league &&
 		$league.players &&
@@ -33,7 +32,7 @@
 				);
 				const finishedMatches = matches.filter((m) => m.endTime);
 				return {
-					id: p.name,
+					id: p.id,
 					name: p.name,
 					queueTime:
 						matches.length > finishedMatches.length
@@ -63,11 +62,15 @@
 			});
 
 	let selectedRowIds = [];
+	$: selectedPlayers = $league.players.filter((p) => selectedRowIds.includes(p.id));
 
+	let newPlayerName = null;
 	let addPlayerOpen = false;
 	async function addPlayer() {
 		if (newPlayerName) {
+			const id = $league.players ? Math.max($league.players.map((p) => p.id)) + 1 : 1;
 			$league.players.push({
+				id: id,
 				name: newPlayerName,
 				startTime: Date.now()
 			});
@@ -75,6 +78,19 @@
 			newPlayerName = null;
 		}
 		addPlayerOpen = false;
+	}
+
+	$: isEditPlayerEnabled = selectedRowIds.length === 1;
+	let editPlayerOpen = false;
+	let editPlayerName;
+	function prepareEditPlayer() {
+		editPlayerName = selectedPlayers[0].name;
+		editPlayerOpen = true;
+	}
+	async function editPlayer() {
+		$league.players.find((p) => p.id === selectedRowIds[0]).name = editPlayerName;
+		await setDoc(doc(db, 'leagues', $page.params.id), $league);
+		editPlayerOpen = false;
 	}
 
 	$: isNewMatchEnabled = selectedRowIds.length === 2 || selectedRowIds.length === 4;
@@ -115,6 +131,9 @@
 	<Toolbar>
 		<ToolbarContent>
 			<Button kind="tertiary" on:click={() => (addPlayerOpen = true)}>Add Player</Button>
+			<Button disabled={!isEditPlayerEnabled} kind="tertiary" on:click={() => prepareEditPlayer()}
+				>Edit Player</Button
+			>
 			<Button disabled={!isNewMatchEnabled} kind="tertiary" on:click={prepareNewMatch}
 				>New Match</Button
 			>
@@ -134,6 +153,22 @@
 	on:submit
 >
 	<TextInput bind:value={newPlayerName} labelText="Name" />
+</Modal>
+
+<Modal
+	bind:open={editPlayerOpen}
+	modalHeading="Edit Player"
+	primaryButtonText="Confirm"
+	secondaryButtonText="Cancel"
+	on:click:button--secondary={() => (editPlayerOpen = false)}
+	on:click:button--primary={() => editPlayer()}
+	on:open
+	on:close
+	on:submit
+>
+	{#if selectedPlayers.length === 1}
+		<TextInput bind:value={editPlayerName} labelText="Name" />
+	{/if}
 </Modal>
 
 <Modal

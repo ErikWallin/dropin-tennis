@@ -20,15 +20,19 @@
 		{ key: 'result', value: 'Result' }
 	];
 
+	function playerName(id) {
+		return $league.players.find(p => p.id === id).name;
+	}
+
 	$: rows =
 		$league &&
 		$league.matches.map((m) => {
 			const opponents =
-				m.team1[0] +
-				(m.team1[1] ? '/' + m.team1[1] : '') +
+				playerName(m.team1[0]) +
+				(m.team1[1] ? '/' + playerName(m.team1[1]) : '') +
 				' vs ' +
-				m.team2[0] +
-				(m.team2[1] ? '/' + m.team2[1] : '');
+				playerName(m.team2[0]) +
+				(m.team2[1] ? '/' + playerName(m.team2[1]) : '');
 			return {
 				id: m.id,
 				opponents: opponents,
@@ -51,7 +55,17 @@
 
 	$: isEditEnabled = selectedRowIds.length === 1;
 	let editMatchOpen = false;
+	let editResult1 = null;
+	let editResult2 = null;
+	function prepareEditMatch() {
+		editResult1 = selectedMatch.result1
+		editResult2 = selectedMatch.result2
+		editMatchOpen = true;
+	}
 	async function editMatch() {
+		const em = $league.matches.find((m) => m.id === selectedRowIds[0])
+		em.result1 = editResult1;
+		em.result2 = editResult2;
 		await setDoc(doc(db, 'leagues', $page.params.id), $league);
 		selectedRowIds = [];
 		editMatchOpen = false;
@@ -61,7 +75,7 @@
 <DataTable title="Matches" size="compact" radio bind:selectedRowIds {headers} {rows}>
 	<Toolbar>
 		<ToolbarContent>
-			<Button disabled={!isEditEnabled} kind="tertiary" on:click={() => (editMatchOpen = true)}
+			<Button disabled={!isEditEnabled} kind="tertiary" on:click={() => prepareEditMatch()}
 				>Edit</Button
 			>
 			<Button disabled={!isRemoveEnabled} kind="tertiary" on:click={() => (removeMatchOpen = true)}
@@ -103,7 +117,7 @@
 					{selectedMatch.team1[0] + (selectedMatch.team1[1] ? '/' + selectedMatch.team1[1] : '')}
 				</Column>
 				<Column>
-					<NumberInput min={0} max={8} bind:value={selectedMatch.result1} />
+					<NumberInput min={0} max={8} bind:value={editResult1} />
 				</Column>
 			</Row>
 			<Row>
@@ -111,11 +125,9 @@
 					{selectedMatch.team2[0] + (selectedMatch.team2[1] ? '/' + selectedMatch.team2[1] : '')}
 				</Column>
 				<Column>
-					<NumberInput min={0} max={8} bind:value={selectedMatch.result2} />
+					<NumberInput min={0} max={8} bind:value={editResult2} />
 				</Column>
 			</Row>
 		</Grid>
-		<p />
-		<p />
 	{/if}
 </Modal>
