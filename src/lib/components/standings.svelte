@@ -12,6 +12,16 @@
 		{ key: 'gamesLost', value: 'Games lost' },
 		{ key: 'points', value: 'Points' }
 	];
+	const compactHeaders = [
+		{ key: 'name', value: '' },
+		{ key: 'matchesPlayed', value: 'MP' },
+		{ key: 'matchesWon', value: 'MW' },
+		{ key: 'matchesDraw', value: 'MD' },
+		{ key: 'matchesLost', value: 'ML' },
+		{ key: 'gamesWon', value: 'GW' },
+		{ key: 'gamesLost', value: 'GL' },
+		{ key: 'points', value: 'Pts' }
+	];
 
 	let rows;
 	$: if ($league) {
@@ -82,4 +92,8 @@
 	}
 </script>
 
-<DataTable title="Standings" size="compact" {headers} {rows} />
+<DataTable
+		title="Standings"
+		size="compact"
+		headers={compactHeaders}
+		{rows} />
