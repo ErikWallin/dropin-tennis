@@ -1,4 +1,6 @@
 <script>
+	import '$lib/fb';
+	import 'carbon-components-svelte/css/white.css';
 	import { Button } from 'carbon-components-svelte';
 	import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 	import { goto } from '$app/navigation';
@@ -12,12 +14,14 @@
 
 	function signup() {
 		createUserWithEmailAndPassword(auth, email, password)
-			.then((userCredential) => {
-				const user = userCredential.user;
-				localStorage.setItem('uid', user.uid);
+			.then(() => {
 				goto('/');
 			})
 			.catch((error) => console.error(error));
+	}
+
+	function login() {
+		goto('/login');
 	}
 </script>
 
@@ -27,10 +31,12 @@
 			<Column>
 				<h1>Signup</h1>
 				<TextInput bind:value={email} labelText="Email" placeholder="Enter email..." />
-				<br />
+				<br>
 				<PasswordInput bind:value={password} labelText="Password" placeholder="Enter password..." />
-				<br />
+				<br>
 				<Button on:click={signup}>Signup</Button>
+				<br>
+				<p>Already a user? <Button on:click={login} kind="ghost">Login</Button></p>
 			</Column>
 		</Row>
 	</Grid>

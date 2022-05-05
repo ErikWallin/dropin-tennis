@@ -5,6 +5,7 @@
 		HeaderGlobalAction,
 		SkipToContent
 	} from 'carbon-components-svelte';
+	import Information from 'carbon-icons-svelte/lib/Information.svelte';
 	import Logout from 'carbon-icons-svelte/lib/Logout.svelte';
 	import Login from 'carbon-icons-svelte/lib/Login.svelte';
 	import { user } from '$lib/stores/user';
@@ -15,13 +16,16 @@
 
 	function logout() {
 		signOut(auth).then(() => {
-			localStorage.removeItem('uid');
 			goto('/login');
 		});
 	}
 
 	function gotoLogin() {
 		goto('/login');
+	}
+
+	function gotoAbout() {
+		goto('/about');
 	}
 </script>
 
@@ -30,6 +34,7 @@
 		<SkipToContent />
 	</svelte:fragment>
 	<HeaderUtilities>
+		<HeaderGlobalAction on:click={gotoAbout} aria-label="About" icon={Information} />
 		{#if $user}
 			<HeaderGlobalAction on:click={logout} aria-label="Logout" icon={Logout} />
 		{:else}

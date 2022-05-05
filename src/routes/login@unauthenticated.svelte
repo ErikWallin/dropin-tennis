@@ -6,13 +6,9 @@
 
 	let email = null;
 	let password = null;
-	const auth = getAuth();
-
 	function login() {
-		signInWithEmailAndPassword(auth, email, password)
-			.then((userCredential) => {
-				const user = userCredential.user;
-				localStorage.setItem('uid', user.uid);
+		signInWithEmailAndPassword(getAuth(), email, password)
+			.then(() => {
 				goto('/');
 			})
 			.catch((error) => console.error(error));
